@@ -1,0 +1,112 @@
+// Neon "welcome" sign with React + TailwindCSS
+
+import React, { useRef, useEffect, useState } from 'react';
+import LoadingSCreenSound from './assets/sounds/LoadingScreenSound.mp3';
+
+export const LoadingScreen = ({ onClick, loadingDuration = 4000 }) => {
+  const audioRef = useRef(null);
+  const fadeTimerRef = useRef(null);
+  const stopTimerRef = useRef(null);
+  const [clicked, setClicked] = useState(false);
+  const [showBlink, setShowBlink] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  const handleClick = (e) => {
+    if (clicked) return; 
+    setClicked(true);
+
+    // Play mp3
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(LoadingScreenSound);
+        audioRef.current.volume = 0.7;    // volume (start)
+      }
+
+      audioRef.current.play()
+        .catch(e => console.error("Audio playback failed:", e));
+
+      stopTimerRef.current = setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime - 0;
+        }
+      }, 7500);   // max duration 7.5 seconds
+
+      const fadeStartTime = Math.min(
+        loadingDuration - 500,
+        6500
+      );
+
+      fadeTimerRef.current = setTimeout(() => {
+        if (!audioRef.current) return;
+
+        const fadeOutInterval = setInterval(() => {
+          if (audioRef.current.volume > 0.05) {
+            audioRef.current.volume -= 0.05;
+          } else {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            clearInterval(fadeOutInterval);
+          }
+        }, 90); // Smooth fade
+      }, fadeStartTime);
+
+    } catch (e) {
+      console.error("Audio initialization failed:", e);
+    }
+
+    // Start blink animations
+    const blinkTimer = setTimeout(() => {
+      setShowBlink(true);
+    }, 700);
+
+    const fadeOutTimer = setTimeout(() => {
+      setFadeOut(true);
+    }, 5000);
+    
+    if (onClick) onClick(e);
+
+    return () => {
+      clearTimeout(blinkTimer);
+      clearTimeout(fadeOutTimer);
+    };
+  };
+
+  useEffect(() => {
+    return () => {
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+      if (stopTimerRef.current) clearTimeout(stopTimerRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
+
+  return (
+    <>
+      <div 
+          className={`fixed inset-0 bg-black z-50 cursor-pointer transition-opacity duration-1500 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
+          onClick={handleClick}
+          style={{ pointerEvents: fadeOut ? 'none' : 'auto' }}
+        >
+        <div className="absolute top-[10px] left-0 right-0 text-center font-[Neonderthaw] text-[18vh] font-bold">
+        <span className={clicked ? 
+            "text-[rgb(140,51,255)] [text-shadow:0_-40px_100px,0_0_2px,0_0_0.7em_rgba(203,72,255,0.795),0_0_0.3em_rgba(45,1,70,0.719),0_0_0.1em_rgba(255,78,66,0.719)]" : 
+            "text-[rgba(253,253,253,0.329)]"}>
+            we{showBlink ? (
+              <span className="[animation:blink-fast_1.5s_linear_infinite_0s]">lc</span>
+            ) : 'lc'}om{showBlink ? (
+              <span className="[animation:blink-slow_2.7s_linear_infinite_0s]">e</span>
+            ) : 'e'}
+          </span>
+          {!clicked && (
+            <p className="text-[rgba(123,221,216,0.86)] [text-shadow:2px_2px_8px_rgba(227,71,255,0.8)] text-lg mt-4 font-['Sirin_Stencil']">
+              «click anywhere»
+            </p>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
