@@ -1,7 +1,45 @@
 // Neon "welcome" sign with React + TailwindCSS
 
 import React, { useRef, useEffect, useState } from 'react';
-import LoadingSCreenSound from './assets/sounds/LoadingScreenSound.mp3';
+import LoadingScreenSound from './LoadingScreenSound.mp3';
+import './index.css'
+
+    // CSS:
+    
+    @keyframes blink-fast {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        color: rgb(143, 74, 255);
+        text-shadow: 
+          0 -40px 100px,
+          0 0 2px,
+          0 0 1em rgba(203, 72, 255, 0.795),
+          0 0 0.5em rgba(0, 204, 255, 0.719),
+          0 0 0.1em rgba(255, 102, 0, 0.795),
+          0 10px 3px rgb(0,0,0);
+      }
+      20%, 22%, 24%, 55% {
+        color: rgb(0,0,0);
+        text-shadow: none;
+      }
+    }
+    
+    @keyframes blink-slow {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        color: rgb(143, 74, 255);
+        text-shadow: 
+          0 -40px 100px,
+          0 0 2px,
+          0 0 1em rgba(255, 0, 255, 0.795),
+          0 0 0.5em rgba(0, 204, 255, 0.719),
+          0 0 0.1em rgba(255, 102, 0, 0.795),
+          0 10px 3px rgb(0,0,0);
+      }
+      20%, 22%, 24%, 55% {
+        color: rgb(0,0,0);
+        text-shadow: none;
+      }
+    }
+
 
 export const LoadingScreen = ({ onClick, loadingDuration = 4000 }) => {
   const audioRef = useRef(null);
